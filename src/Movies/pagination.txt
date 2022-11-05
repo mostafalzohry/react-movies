@@ -1,0 +1,61 @@
+import axios from "axios"
+import { useEffect, useState } from "react"
+import {Link} from "react-router-dom"
+import ReactPaginate from 'react-paginate';
+
+function MoviesComponant(){
+    const [movies, setMovies] = useState([])
+    const [offset, setOffset] = useState(0);
+    const [perPage] = useState(10);
+    const [pageCount, setPageCount] = useState(0)
+    
+    
+        const getData = async() => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/popular?api_key=229941a38edbfb81bcf212bdbe456518`)
+            const data = res.data.results;
+            const slice = data.slice(offset, offset + perPage)
+            const postData = slice.map((mov) => 
+                
+                    <div className="card bg-dark p-3">
+                        <img src={`https://image.tmdb.org/t/p/w500/${mov.poster_path}`} class="card-img-top h-50" alt="..."/>
+                        <div className="card-body">
+                            <Link key={mov.id} to={`/moviedetails/${mov.id}`} style={{textDecoration:'none'}}><h6 className="text-danger">{mov.original_title}</h6></Link>
+                        </div>
+                    </div>
+                
+               
+            )
+            setMovies(postData)
+            setPageCount(Math.ceil(data.length / perPage))
+        }
+    useEffect(() => {
+        getData()
+    }, [offset])
+    
+    const handlePageClick = (e) => {
+        const selectedPage = e.selected;
+        setOffset(selectedPage + 1)
+    };
+    return(
+        <>      
+            <div className="">
+                <div className="row d-flex flex-wrap justify-content-center align-items-center">
+                    {movies}
+                    <ReactPaginate
+                    previousLabel={"prev"}
+                    nextLabel={"next"}
+                    breakLabel={"..."}
+                    breakClassName={"break-me"}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination"}
+                    subContainerClassName={"pages pagination"}
+                    activeClassName={"active"}/>
+                </div>
+            </div>
+        </>
+    )
+}
+export default MoviesComponant;
